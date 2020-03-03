@@ -183,7 +183,7 @@ z_section = cell(N_day,1);
 
 Count_day = 0;
 %% Typical days
-for day = (Cluster_day_number(1,1))'
+for day = (Cluster_day_number(:,1))'
     day
     Count_day = Count_day+1
     
@@ -267,7 +267,7 @@ for day = (Cluster_day_number(1,1))'
     end
     % ------ Wind, PV, CSP ------
     
-    % Optimization
+    %% Optimization
     PG_G = sdpvar(size(gen_total,1),Horizon,'full');% Hydro and thermal power
     PG_RE = sdpvar(NRE,Horizon,'full');% Wind and PV power
     PG_CSP = sdpvar(size(CSP_total,1),Horizon,'full');% CSP power
@@ -380,8 +380,8 @@ for day = (Cluster_day_number(1,1))'
         sum(z_Branch{Count_day}(intersect(intersect(find(a.branch(:,1)>Area_bus(1)),find(a.branch(:,1)<=Area_bus(2))),intersect(find(a.branch(:,2)>Area_bus(2)),find(a.branch(:,2)<=Area_bus(3)))),:),1)
         sum(z_Branch{Count_day}(intersect(intersect(find(a.branch(:,1)>Area_bus(1)),find(a.branch(:,1)<=Area_bus(2))),intersect(find(a.branch(:,2)>Area_bus(4)),find(a.branch(:,2)<=Area_bus(5)))),:),1)];
     
-%     str = strcat('Result_Operation_Simulation',int2str(Count_day));
-%     save(str);
+     str = strcat('Result_Operation_Simulation',int2str(Count_day));
+     save(str);
 end
 z_obj_year = z_obj'*Cluster_day_number(:,2); % annual operation cost
 z_RCR_year = z_RCR'*Cluster_day_number(:,2)/365; % annual average VRE curtailment rate
@@ -392,4 +392,4 @@ for i = 1:20
     Energy_all = Energy_all+(sum(sum(z_PG_RE{i}))+sum(sum(z_PG_G{i})))*Cluster_day_number(i,2);
 end
 z_Energy_rate_RE = Energy_RE/Energy_all; % Energy share of VRE
-% save(str);
+ save(str);
