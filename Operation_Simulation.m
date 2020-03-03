@@ -15,7 +15,7 @@ load('DCtrans');
 load('TieLine2');
 load('Cluster_day_number');
 
-%% parameter setting 
+%% Parameter setting
 Horizon = 24;
 TimeScale = 1;% 1h as the time scale
 CoeffReseve_load = 0.03;% reserve coefficient for load
@@ -25,10 +25,10 @@ efficiency_ele_ther = 0.415;% efficiency of electric power output over input the
 Capacity_TES_CSP = 2.4; % TES capacity relative to the capacity of power block of CSP
 ratio_TES_t0 = 0.5;% initial energy ratio of TES
 TES_hour = 10;% TES-hour
-theta_Load = 100;
+theta_Load = 3/7*1000;% $/MWh % load shedding penalty 
 
 % read the dataset of FTS-213
-a = case213_20200213; 
+a = case213_20200302;
 
 N = length(a.bus(:,1));
 Nbr = length(a.branch(:,1));
@@ -88,7 +88,7 @@ EHydro_month = zeros(12,1);
 for i = 1:12
     EHydro_month(i) = month_week(i,2)*24*PHydro_all(2,i+2);
 end
-EHydro_day = zeros(5,365); 
+EHydro_day = zeros(5,365);
 mean_PLoad = zeros(365,5);
 for Area = 1:5
     mean_PLoad(:,Area) = mean(PLoad_all{Area},2);
@@ -141,7 +141,7 @@ end
 % ------ Inter-regional power exchange ------
 TieLine_section = [2,1;2,4;2,3;5,2];
 section = zeros(4,8760);
-for s = 1:4 
+for s = 1:4
     for i = 1:365
         if i <= month_week(1,3)
             if TieLine2(s,1) > 0
@@ -183,14 +183,14 @@ z_section = cell(N_day,1);
 
 Count_day = 0;
 %% Typical days
-for day = (Cluster_day_number(:,1))'
+for day = (Cluster_day_number(1,1))'
     day
     Count_day = Count_day+1
     
-	% ------ Load ------
-	% --- Local load ---
+    % ------ Load ------
+    % --- Local load ---
     PLoad_day0 = zeros(N,Horizon);
-	for row = 1:N
+    for row = 1:N
         if a.bus(row,11) == 1
             PLoad_day0(row,:) = a.bus(row,3)*PLoad_all{6}((day-1)*Horizon+1:day*Horizon);
         elseif a.bus(row,11) == 2
@@ -204,7 +204,7 @@ for day = (Cluster_day_number(:,1))'
         end
     end
     PLoad_day = PLoad_day0;
-	% --- Local load ---
+    % --- Local load ---
     % --- External load ---
     if day <= 31
         for b = 1:size(DCtrans,1)
@@ -219,10 +219,10 @@ for day = (Cluster_day_number(:,1))'
             end
         end
     end
-	% --- External load ---
-	% ------ Load ------
-
-	% ------ Wind, PV, CSP ------ 
+    % --- External load ---
+    % ------ Load ------
+    
+    % ------ Wind, PV, CSP ------
     PRE_hour = zeros(NRE,Horizon);
     for row = 1:NRE
         if a.RE(row,3) == 3
@@ -265,16 +265,16 @@ for day = (Cluster_day_number(:,1))'
             PtCSP_hour(row,:) = a.CSP(row,9)*PCSP_all{10}((day-1)*Horizon+1:day*Horizon);
         end
     end
-	% ------ Wind, PV, CSP ------ 
-	
-    % Optimization 
-    PG_G = sdpvar(size(gen_total,1),Horizon,'full');% Hydro and thermal power 
+    % ------ Wind, PV, CSP ------
+    
+    % Optimization
+    PG_G = sdpvar(size(gen_total,1),Horizon,'full');% Hydro and thermal power
     PG_RE = sdpvar(NRE,Horizon,'full');% Wind and PV power
-    PG_CSP = sdpvar(size(CSP_total,1),Horizon,'full');% CSP power 
-    PC_Load = sdpvar(N,Horizon,'full');% Load shedding 
+    PG_CSP = sdpvar(size(CSP_total,1),Horizon,'full');% CSP power
+    PC_Load = sdpvar(N,Horizon,'full');% Load shedding
     onoff_gen = binvar(size(gen_total,1),Horizon,'full');% on/off status of hydro and thermal units
     onoff_CSP = binvar(size(CSP_total,1),Horizon,'full');% on/off status of CSP units
-    Branch = sdpvar(size(a.branch,1),Horizon,'full');% power flow 
+    Branch = sdpvar(size(a.branch,1),Horizon,'full');% power flow
     Cost_StartUp = sdpvar(size(gen_total,1),Horizon-1,'full');% startup cost
     Pt_TES_charge = sdpvar(size(CSP_total,1),Horizon,'full');% input thermal power for TES of CSP
     Pt_TES_discharge= sdpvar(size(CSP_total,1),Horizon,'full');% output thermal power for TES of CSP
@@ -305,7 +305,7 @@ for day = (Cluster_day_number(:,1))'
                 end
             end
         end
-        % Ramp rate constraints 
+        % Ramp rate constraints
         if k >= 2
             F = [F, PG_G(:,k)-PG_G(:,k-1) <= onoff_gen(:,k-1).*gen_total(:,23)*TimeScale*60+(onoff_gen(:,k)-onoff_gen(:,k-1)).*gen_total(:,10)+(1-onoff_gen(:,k)).*gen_total(:,9)];
             F = [F, -PG_G(:,k)+PG_G(:,k-1) <= onoff_gen(:,k).*gen_total(:,24)*TimeScale*60+(-onoff_gen(:,k)+onoff_gen(:,k-1)).*gen_total(:,10)+(1-onoff_gen(:,k-1)).*gen_total(:,9)];
@@ -317,12 +317,12 @@ for day = (Cluster_day_number(:,1))'
     F = [F, onoff_gen(union(find(gen_total(:,22)==2),find(gen_total(:,22)==5)),:).*(gen_total(union(find(gen_total(:,22)==2),find(gen_total(:,22)==5)),10)*ones(1,Horizon)) <= PG_G(union(find(gen_total(:,22)==2),find(gen_total(:,22)==5)),:) <= onoff_gen(union(find(gen_total(:,22)==2),find(gen_total(:,22)==5)),:).*(gen_total(union(find(gen_total(:,22)==2),find(gen_total(:,22)==5)),9)*ones(1,Horizon))];
     F = [F, onoff_CSP.*(CSP_total(:,10)*ones(1,Horizon)) <= PG_CSP <= onoff_CSP.*(CSP_total(:,9)*ones(1,Horizon))];
     F = [F, onoff_gen(find(gen_total(:,22)==1),:)*PHydro_min(day).*(gen_total(find(gen_total(:,22)==1),9)*ones(1,Horizon)) <= PG_G(find(gen_total(:,22)==1),:) <= onoff_gen(find(gen_total(:,22)==1),:)*PHydro_max(day).*(gen_total(find(gen_total(:,22)==1),9)*ones(1,Horizon))];
-    % Power balance constraints 
+    % Power balance constraints
     F = [F, sum(PG_G,1)+sum(PG_RE,1)+sum(PG_CSP,1) == sum(PLoad_day-PC_Load,1)];
-    % Power flow constraints 
+    % Power flow constraints
     F = [F, Branch == GSDF*(M_bus_G*M_gen_gentotal*PG_G+M_bus_RE*PG_RE+M_bus_CSP*M_CSP_CSPtotal*PG_CSP-(PLoad_day-PC_Load))];
     F = [F, -a.branch(:,6)*ones(1,Horizon) <= GSDF*(M_bus_G*M_gen_gentotal*PG_G+M_bus_RE*PG_RE+M_bus_CSP*M_CSP_CSPtotal*PG_CSP-(PLoad_day-PC_Load)) <= a.branch(:,6)*ones(1,Horizon)];
-    % Inter-regional power constraints 
+    % Inter-regional power constraints
     F = [F, -section(1,(day-1)*24+1:(day-1)*24+Horizon) <= sum(Branch(intersect(find(a.branch(:,1)<=Area_bus(1)),intersect(find(a.branch(:,2)>Area_bus(1)),find(a.branch(:,2)<=Area_bus(2)))),:),1) <= -section(1,(day-1)*24+1:(day-1)*24+Horizon)];
     F = [F, section(2,(day-1)*24+1:(day-1)*24+Horizon) <= sum(Branch(intersect(intersect(find(a.branch(:,1)>Area_bus(1)),find(a.branch(:,1)<=Area_bus(2))),intersect(find(a.branch(:,2)>Area_bus(3)),find(a.branch(:,2)<=Area_bus(4)))),:),1) <= section(2,(day-1)*24+1:(day-1)*24+Horizon)];
     F = [F, section(3,(day-1)*24+1:(day-1)*24+Horizon) <= sum(Branch(intersect(intersect(find(a.branch(:,1)>Area_bus(1)),find(a.branch(:,1)<=Area_bus(2))),intersect(find(a.branch(:,2)>Area_bus(2)),find(a.branch(:,2)<=Area_bus(3)))),:),1) <= section(3,(day-1)*24+1:(day-1)*24+Horizon)];
@@ -331,28 +331,28 @@ for day = (Cluster_day_number(:,1))'
     for Area = 1:5
         F = [F, sum(PG_G((intersect(find(gen_total(:,22)==1),find(gen_total(:,31)==Area))),1:Horizon),2) <= gen_total(intersect(find(gen_total(:,22)==1),find(gen_total(:,31)==Area)),9)*EHydro_day(Area,day)/24*Horizon];
     end
-    % Hydro units are set as online 
+    % Hydro units are set as online
     F = [F, onoff_gen(find(gen_total(:,22)==1),:) == 1];
-    % Wind and PV output constraints 
+    % Wind and PV output constraints
     F = [F, 0 <= PG_RE <= PRE_hour];
-    % Load shedding constraints 
+    % Load shedding constraints
     F = [F, 0 <= PC_Load <= PLoad_day0];
-    % Reserve constraints 
+    % Reserve constraints
     F = [F, sum(onoff_gen.*(gen_total(:,9)*ones(1,Horizon))-PG_G,1)+sum(onoff_CSP.*(CSP_total(:,9)*ones(1,Horizon))-PG_CSP,1) >= sum(CoeffReseve_load*PLoad_day0,1)+sum(CoeffReserve_VRE*PG_RE,1)];
-    % Startup cost constraints 
+    % Startup cost constraints
     F = [F, Cost_StartUp >= (onoff_gen(:,2:Horizon)-onoff_gen(:,1:Horizon-1)).*(gen_total(:,28)*ones(1,Horizon-1))];
     F = [F, Cost_StartUp >= 0];
-    % CSP internal constraints 
-    F = [F, PG_CSP/efficiency_ele_ther+Pt_TES_charge-Pt_TES_discharge <= PtCSP_hour];% Thermal power balance 
+    % CSP internal constraints
+    F = [F, PG_CSP/efficiency_ele_ther+Pt_TES_charge-Pt_TES_discharge <= PtCSP_hour];% Thermal power balance
     F = [F, Et_TES(:,2:Horizon)-Et_TES(:,1:Horizon-1) == Pt_TES_charge(:,1:Horizon-1)*efficiency_TES-Pt_TES_discharge(:,1:Horizon-1)/efficiency_TES];
     F = [F, 0 <= [Pt_TES_charge;Pt_TES_discharge] <= Capacity_TES_CSP*ones(size(CSP_total,1)*2,Horizon)];
     F = [F, 0 <= Et_TES <= Capacity_TES_CSP*CSP_total(:,9)*ones(1,Horizon)];
     F = [F, Et_TES(:,1) == Capacity_TES_CSP*CSP_total(:,9)*ratio_TES_t0];
     F = [F, Et_TES(:,1) == Et_TES(:,Horizon)];
-  
-	% Objective function 
+    
+    % Objective function
     obj = sum(gen_total(:,30)'*PG_G)+sum(CSP_total(:,30)'*PG_CSP)+sum(sum(Cost_StartUp))+theta_Load*sum(sum(PC_Load));
-	% Run optimization 
+    % Run optimization
     ops = sdpsettings('solver','gurobi','verbose',0,'gurobi.MIPGap',5e-3,'gurobi.TimeLimit',1.45e5);
     ans = optimize(F,obj,ops)
     
@@ -360,11 +360,11 @@ for day = (Cluster_day_number(:,1))'
     z_obj(Count_day) = value(obj);
     z_PG_G{Count_day} = value(PG_G);
     z_PG_RE{Count_day} = value(PG_RE);
-    z_PG_CSP{Count_day} = value(PG_CSP); 
+    z_PG_CSP{Count_day} = value(PG_CSP);
     z_PC_Load{Count_day} = value(PC_Load);
     z_RCR(Count_day) = (sum(sum(PRE_hour))-sum(sum(z_PG_RE{Count_day})))/sum(sum(PRE_hour));
     z_PG_Thermal_Coal{Count_day} = z_PG_G{Count_day}(find(gen_total(:,22)==2),:);
-    z_PG_Thermal_Gas{Count_day} = z_PG_G{Count_day}(find(gen_total(:,22)==5),:);   
+    z_PG_Thermal_Gas{Count_day} = z_PG_G{Count_day}(find(gen_total(:,22)==5),:);
     z_PG_Hydro{Count_day} = z_PG_G{Count_day}(find(gen_total(:,22)==1),:);
     z_PG_Wind{Count_day} = z_PG_RE{Count_day}(find(a.RE(:,3)==4),:);
     z_PG_Solar{Count_day} = z_PG_RE{Count_day}(find(a.RE(:,3)==3),:);
@@ -372,7 +372,7 @@ for day = (Cluster_day_number(:,1))'
     z_Pt_TES_charge = value(Pt_TES_charge);
     z_Pt_TES_discharge = value(Pt_TES_discharge);
     z_onoff_gen{Count_day} = value(onoff_gen);
-    z_onoff_CSP{Count_day} = value(onoff_CSP);    
+    z_onoff_CSP{Count_day} = value(onoff_CSP);
     z_Branch{Count_day} = GSDF*(M_bus_G*M_gen_gentotal*z_PG_G{Count_day}+M_bus_RE*z_PG_RE{Count_day}-(PLoad_day-z_PC_Load{Count_day}));
     z_section{Count_day} = [
         value(sum(z_Branch{Count_day}(intersect(find(a.branch(:,1)<=Area_bus(1)),intersect(find(a.branch(:,2)>Area_bus(1)),find(a.branch(:,2)<=Area_bus(2)))),:),1));
@@ -380,8 +380,8 @@ for day = (Cluster_day_number(:,1))'
         sum(z_Branch{Count_day}(intersect(intersect(find(a.branch(:,1)>Area_bus(1)),find(a.branch(:,1)<=Area_bus(2))),intersect(find(a.branch(:,2)>Area_bus(2)),find(a.branch(:,2)<=Area_bus(3)))),:),1)
         sum(z_Branch{Count_day}(intersect(intersect(find(a.branch(:,1)>Area_bus(1)),find(a.branch(:,1)<=Area_bus(2))),intersect(find(a.branch(:,2)>Area_bus(4)),find(a.branch(:,2)<=Area_bus(5)))),:),1)];
     
-    str = strcat('Result_Operation_Simulation',int2str(Count_day));
-    save(str);
+%     str = strcat('Result_Operation_Simulation',int2str(Count_day));
+%     save(str);
 end
 z_obj_year = z_obj'*Cluster_day_number(:,2); % annual operation cost
 z_RCR_year = z_RCR'*Cluster_day_number(:,2)/365; % annual average VRE curtailment rate
@@ -392,4 +392,4 @@ for i = 1:20
     Energy_all = Energy_all+(sum(sum(z_PG_RE{i}))+sum(sum(z_PG_G{i})))*Cluster_day_number(i,2);
 end
 z_Energy_rate_RE = Energy_RE/Energy_all; % Energy share of VRE
-save(str);
+% save(str);
