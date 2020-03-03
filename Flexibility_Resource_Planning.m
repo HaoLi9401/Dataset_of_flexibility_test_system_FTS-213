@@ -12,7 +12,7 @@ load('DCtrans');
 load('TieLine2');
 load('Cluster_day_number');
 
-a = case213_20200213;
+a = case213_20200302;
 %%%%%%%%%%%%%%%%%%
 a.RE(:,7) = a.RE(:,7)*3;
 %%%%%%%%%%%%%%%%%%
@@ -27,7 +27,7 @@ efficiency_ele_ther = 0.415;% efficiency of electric power output over input the
 Capacity_TES_CSP = 2.4;% TES capacity relative to the capacity of power block of CSP
 ratio_TES_t0 = 0.5;% initial energy ratio of TES
 
-LT_ES_Battery = 10; % life time of battery 
+LT_ES_Battery = 10; % life time of battery
 LT_ES_HydroPump = 30;% life time of pumped hydro
 LT_ES_CAES = 25;% life time of CAES
 LT = 40;% life time of others
@@ -37,8 +37,8 @@ txl = w*((1+w)^LT)/(((1+w)^LT)-1);
 txl_ES_Battery = w*((1+w)^LT_ES_Battery)/(((1+w)^LT_ES_Battery)-1);
 txl_ES_HydroPump = w*((1+w)^LT_ES_HydroPump)/(((1+w)^LT_ES_HydroPump)-1);
 txl_ES_CAES = w*((1+w)^LT_ES_CAES)/(((1+w)^LT_ES_CAES)-1);
-theta_Load = 3/7*1000/1e6;% M$/MWh 
-theta_RE = 0.42/7*1000/1e6;% M$/MWh 
+theta_Load = 3/7*1000/1e6;% M$/MWh
+theta_RE = 0.42/7*1000/1e6;% M$/MWh
 cost_thermal_coal_peak_depth = 3e4/1e6; % M$/MW
 cost_thermal_gas_peak_depth = 2e5/1e6; % M$/MW
 
@@ -50,7 +50,7 @@ cost_DR2_Capacity = 100000/7/1e6; % M$/MW, load shedding
 cost_DR1_Energy = 350/7/1e6;%compensate cost，M$/MWh, load shifting
 cost_DR2_Energy = 450/7/1e6;%compensate cost，M$/MWh, load shedding
 
-% ES efficiency 
+% ES efficiency
 efficiency_ES_Battery = 0.86;
 efficiency_ES_HydroPump = 0.8;
 efficiency_ES_CAES = 0.52;
@@ -138,10 +138,10 @@ EHydro_month = zeros(12,1);
 for i = 1:12
     EHydro_month(i) = month_week(i,2)*24*PHydro_all(2,i+2);
 end
-EHydro_day = zeros(5,365); 
+EHydro_day = zeros(5,365);
 mean_PLoad = zeros(365,5);
 for Area = 1:5
-    mean_PLoad(:,Area) = mean(PLoad_all{Area},2);% 没有算DC外送负荷
+    mean_PLoad(:,Area) = mean(PLoad_all{Area},2);
 end
 for i = 1:5
     for j = 1:365
@@ -170,7 +170,7 @@ for row = 1:size(a.CSP,1)
     for j = 1:a.CSP(row,32)
         CSP_total = [CSP_total;a.CSP(row,:)];
     end
-end  
+end
 M_gen_gentotal = zeros(Ngen,size(gen_total,1));
 for row1 = 1:Ngen
     for row2 = 1:size(gen_total,1)
@@ -186,7 +186,7 @@ for row1 = 1:NCSP
             M_CSP_CSPtotal(row1,row2) = 1;
         end
     end
-end											   
+end
 
 
 %% Typical days
@@ -195,7 +195,7 @@ N_scenario = length(day);
 
 % ------ Load ------
 % --- Local load ---
-PLoad_day0 = zeros(N,Horizon,N_scenario);% 实际负荷
+PLoad_day0 = zeros(N,Horizon,N_scenario);
 for sce = 1:N_scenario
     for row = 1:N
         if a.bus(row,11) == 1
@@ -263,20 +263,20 @@ for sce = 1:N_scenario
         end
     end
 end
-PCSP_day = zeros(NCSP,Horizon,N_scenario);% 实际CSP可用热功率
+PCSP_day = zeros(NCSP,Horizon,N_scenario);
 for sce = 1:N_scenario
     for row = 1:NCSP
-            if a.CSP(row,31) == 1
-                PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{6}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
-            elseif a.CSP(row,31) == 2
-                PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{7}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
-            elseif a.CSP(row,31) == 3
-                PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{8}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
-            elseif a.CSP(row,31) == 4
-                PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{9}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
-            else
-                PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{10}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
-            end
+        if a.CSP(row,31) == 1
+            PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{6}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
+        elseif a.CSP(row,31) == 2
+            PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{7}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
+        elseif a.CSP(row,31) == 3
+            PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{8}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
+        elseif a.CSP(row,31) == 4
+            PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{9}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
+        else
+            PCSP_day(row,:,sce) = a.CSP(row,9)*PCSP_all{10}((day(sce)-1)*Horizon+1:day(sce)*Horizon);
+        end
     end
 end
 % ------ Wind, PV, CSP ------
@@ -302,18 +302,18 @@ M_days_RE = zeros(size(a.RE,1),Horizon,N_scenario);
 for sce = 1:N_scenario
     M_min_gen_thermal(:,:,sce) = (gen_total(find(gen_total(:,22)~=1),10)*ones(1,Horizon));
     M_max_gen_thermal(:,:,sce) = (gen_total(find(gen_total(:,22)~=1),9)*ones(1,Horizon));
-	M_min_gen_CSP(:,:,sce) = (CSP_total(:,10)*ones(1,Horizon));
+    M_min_gen_CSP(:,:,sce) = (CSP_total(:,10)*ones(1,Horizon));
     M_max_gen_CSP(:,:,sce) = (CSP_total(:,9)*ones(1,Horizon));
     M_max_gen(:,:,sce) = (gen_total(:,9)*ones(1,Horizon));
     M_CostStartUp(:,:,sce) = gen_total(:,28)*ones(1,Horizon-1);
     M_CostGeneration(:,:,sce) = gen_total(:,30)*ones(1,Horizon);
     M_RampUp(:,:,sce) = gen_total(:,23);
     M_RampDown(:,:,sce) = gen_total(:,24);
-	M_RampUp_CSP(:,:,sce) = CSP_total(:,23);
-	M_RampDown_CSP(:,:,sce) = CSP_total(:,24);
+    M_RampUp_CSP(:,:,sce) = CSP_total(:,23);
+    M_RampDown_CSP(:,:,sce) = CSP_total(:,24);
     M_max_gen2(:,:,sce) = gen_total(:,9);
     M_min_gen2(:,:,sce) = gen_total(:,10);
-	M_max_CSP2(:,:,sce) = CSP_total(:,9);
+    M_max_CSP2(:,:,sce) = CSP_total(:,9);
     M_min_CSP2(:,:,sce) = CSP_total(:,10);
     M_days_gentotal(:,:,sce) = Cluster_day_number(sce,2)*ones(size(gen_total,1),Horizon);
     M_days_bus(:,:,sce) = Cluster_day_number(sce,2)*ones(N,Horizon);
@@ -335,15 +335,15 @@ PG_RE_bus = sdpvar(N,Horizon,N_scenario,'full');% injection power of wind and PV
 PG_CSP_bus = sdpvar(N,Horizon,N_scenario,'full');% injection power of CSP units into each bus
 PG_ES_BatteryAndCAES_bus = sdpvar(N,Horizon,N_scenario,'full');% injection power of battery and CAES into each bus
 PG_ES_PumpHydro_bus = sdpvar(N,Horizon,N_scenario,'full');% injection power of pumped hydro into each bus
-PG_ES_BatteryAndCAES = sdpvar(NStorage,Horizon,N_scenario,'full');% output power of battery and CAES 
-E_ES_BatteryAndCAES = sdpvar(NStorage,Horizon,N_scenario,'full');% energy of battery and CAES 
+PG_ES_BatteryAndCAES = sdpvar(NStorage,Horizon,N_scenario,'full');% output power of battery and CAES
+E_ES_BatteryAndCAES = sdpvar(NStorage,Horizon,N_scenario,'full');% energy of battery and CAES
 PG_ES_PumpHydro = sdpvar(NPumpHydro,Horizon,N_scenario,'full');% output power of pumped hydro
-E_ES_PumpHydro = sdpvar(NPumpHydro,Horizon,N_scenario,'full');% energy of pumped hydro 
-PG_DR2 = sdpvar(N,Horizon,N_scenario,'full');% load changing power of load shedding DR 
-PG_DR1 = sdpvar(N,Horizon,N_scenario,'full');% load changing power of load shifting DR 
+E_ES_PumpHydro = sdpvar(NPumpHydro,Horizon,N_scenario,'full');% energy of pumped hydro
+PG_DR2 = sdpvar(N,Horizon,N_scenario,'full');% load changing power of load shedding DR
+PG_DR1 = sdpvar(N,Horizon,N_scenario,'full');% load changing power of load shifting DR
 abs_PG_DR1 = sdpvar(N,Horizon,N_scenario,'full');% Auxiliary variables to indicate the absolute value of load shifting DR
 Branch = sdpvar(size(a.branch,1)+size(a.candi_AC,1)+size(a.candi_DC,1),Horizon,N_scenario,'full');% power flow
-theta = sdpvar(N,Horizon,N_scenario,'full');% phases angle 
+theta = sdpvar(N,Horizon,N_scenario,'full');% phases angle
 % Investment variables
 invest_line_AC = binvar(size(a.candi_AC,1),1); % AC branch
 invest_line_DC = binvar(size(a.candi_DC,1),1); % DC branch
@@ -351,11 +351,11 @@ invest_gen_peak_depth = sdpvar(size(gen_total,1),1,'full');% flexibility retrofi
 invest_ES_BatteryAndCAES = sdpvar(NStorage,1,'full');% battery and CAES
 invest_DR1 = sdpvar(N,1,'full');% load shifting DR
 invest_DR2 = sdpvar(N,1,'full');% load shedding DR
-invest_ES_PumpHydro = binvar(NPumpHydro,1,'full');% pumped hydro 
+invest_ES_PumpHydro = binvar(NPumpHydro,1,'full');% pumped hydro
 
 % Constraints
 F = [];
-% Upper and lower bounds of flexibility retrofit 
+% Upper and lower bounds of flexibility retrofit
 F = [F, gen_total(find(gen_total(:,22)==2),10)-gen_total(find(gen_total(:,22)==2),9)*0.3 >= invest_gen_peak_depth(find(gen_total(:,22)==2)) >= 0];
 F = [F, gen_total(find(gen_total(:,22)==5),10)-gen_total(find(gen_total(:,22)==5),9)*0.3 >= invest_gen_peak_depth(find(gen_total(:,22)==5)) >= 0];
 F = [F, invest_gen_peak_depth(find(gen_total(:,22)==1)) == 0];
@@ -366,11 +366,11 @@ F = [F, 0 <= invest_DR1 <= a.bus(:,3)*ratio_DR1];
 F = [F, 0 <= invest_DR2 <= a.bus(:,3)*ratio_DR2];
 
 for k = 1:Horizon
-    % Ramp rate constraints 
+    % Ramp rate constraints
     if k >= 2
         F = [F, PG_G(:,k,:)-PG_G(:,k-1,:) <= onoff(:,k-1,:).*M_RampUp*TimeScale*60+(onoff(:,k,:)-onoff(:,k-1,:)).*M_min_gen2+(1-onoff(:,k,:)).*M_max_gen2];
         F = [F, -PG_G(:,k,:)+PG_G(:,k-1,:) <= onoff(:,k,:).*M_RampDown*TimeScale*60+(-onoff(:,k,:)+onoff(:,k-1,:)).*M_min_gen2+(1-onoff(:,k-1,:)).*M_max_gen2];
-		F = [F, PG_CSP(:,k,:)-PG_CSP(:,k-1,:) <= onoff_CSP(:,k-1,:).*M_RampUp_CSP*TimeScale*60+(onoff_CSP(:,k,:)-onoff_CSP(:,k-1,:)).*M_min_CSP2+(1-onoff_CSP(:,k,:)).*M_max_CSP2];
+        F = [F, PG_CSP(:,k,:)-PG_CSP(:,k-1,:) <= onoff_CSP(:,k-1,:).*M_RampUp_CSP*TimeScale*60+(onoff_CSP(:,k,:)-onoff_CSP(:,k-1,:)).*M_min_CSP2+(1-onoff_CSP(:,k,:)).*M_max_CSP2];
         F = [F, -PG_CSP(:,k,:)+PG_CSP(:,k-1,:) <= onoff_CSP(:,k,:).*M_RampDown_CSP*TimeScale*60+(-onoff_CSP(:,k,:)+onoff_CSP(:,k-1,:)).*M_min_CSP2+(1-onoff_CSP(:,k-1,:)).*M_max_CSP2];
     end
 end
@@ -381,14 +381,14 @@ F = [F, PG_ES_PumpHydro(:,1:Horizon-1,:) == E_ES_PumpHydro(:,2:Horizon,:)-E_ES_P
 for sce = 1:N_scenario
     for k = 1:Horizon
         for i = 1:N
-            F = [F, PG_G_bus(i,k,sce)+PG_RE_bus(i,k,sce)+PG_CSP_bus(i,k,sce)-(PLoad_day(i,k,sce)-PC_Load(i,k,sce)-PG_DR1(i,k,sce)-PG_DR2(i,k,sce))+PG_ES_BatteryAndCAES_bus(i,k,sce)+PG_ES_PumpHydro_bus(i,k,sce) == -sum(Branch(find(a.branch(:,2)==i),k,sce))-sum(Branch(size(a.branch,1)+find(a.candi_AC(:,2)==i),k,sce))-sum(Branch(size(a.branch,1)+size(a.candi_AC,1)+find(a.candi_DC(:,2)==i),k,sce))+sum(Branch(find(a.branch(:,1)==i),k,sce))+sum(Branch(size(a.branch,1)+find(a.candi_AC(:,1)==i),k,sce))+sum(Branch(size(a.branch,1)+size(a.candi_AC,1)+find(a.candi_DC(:,1)==i),k,sce))];%+PG_CSP_bus(i,k,sce)
+            F = [F, PG_G_bus(i,k,sce)+PG_RE_bus(i,k,sce)+PG_CSP_bus(i,k,sce)-(PLoad_day(i,k,sce)-PC_Load(i,k,sce)-PG_DR1(i,k,sce)-PG_DR2(i,k,sce))+PG_ES_BatteryAndCAES_bus(i,k,sce)+PG_ES_PumpHydro_bus(i,k,sce) == -sum(Branch(find(a.branch(:,2)==i),k,sce))-sum(Branch(size(a.branch,1)+find(a.candi_AC(:,2)==i),k,sce))-sum(Branch(size(a.branch,1)+size(a.candi_AC,1)+find(a.candi_DC(:,2)==i),k,sce))+sum(Branch(find(a.branch(:,1)==i),k,sce))+sum(Branch(size(a.branch,1)+find(a.candi_AC(:,1)==i),k,sce))+sum(Branch(size(a.branch,1)+size(a.candi_AC,1)+find(a.candi_DC(:,1)==i),k,sce))];
         end
     end
 end
 for sce = 1:N_scenario
     F = [F, PG_G_bus(:,:,sce) == M_bus_G*M_gen_gentotal*PG_G(:,:,sce)];
     F = [F, PG_RE_bus(:,:,sce) == M_bus_RE*PG_RE(:,:,sce)];
-	F = [F, PG_CSP_bus(:,:,sce) == M_bus_CSP*M_CSP_CSPtotal*PG_CSP(:,:,sce)];
+    F = [F, PG_CSP_bus(:,:,sce) == M_bus_CSP*M_CSP_CSPtotal*PG_CSP(:,:,sce)];
     F = [F, PG_ES_BatteryAndCAES_bus(:,:,sce) == M_bus_BatteryAndCAES*PG_ES_BatteryAndCAES(:,:,sce)];
     F = [F, PG_ES_PumpHydro_bus(:,:,sce) == M_bus_PumpHydro*PG_ES_PumpHydro(:,:,sce)];
     % Uppwer and lower bounds of power output for hydro, thermal and CSP units
@@ -397,7 +397,7 @@ for sce = 1:N_scenario
     F = [F, onoff(find(gen_total(:,22)==1),:,sce)*PHydro_min(day(sce)).*(gen_total(find(gen_total(:,22)==1),9)*ones(1,Horizon)) <= PG_G(find(gen_total(:,22)==1),:,sce) <= onoff(find(gen_total(:,22)==1),:,sce)*PHydro_max(day(sce)).*(gen_total(find(gen_total(:,22)==1),9)*ones(1,Horizon))];
     % Power flow of existing branches
     for line = 1:size(a.branch,1)
-        F = [F, Branch(line,:,sce)/100 == (theta(a.branch(line,1),:,sce)-theta(a.branch(line,2),:,sce))/a.branch(line,4)];% 可以简化
+        F = [F, Branch(line,:,sce)/100 == (theta(a.branch(line,1),:,sce)-theta(a.branch(line,2),:,sce))/a.branch(line,4)];
         F = [F, -a.branch(line,6)/100*ones(1,Horizon) <= Branch(line,:,sce)/100 <= a.branch(line,6)/100*ones(1,Horizon)];
     end
     % Power flow of candidate AC branches
@@ -413,24 +413,24 @@ for sce = 1:N_scenario
     for Area = 1:5
         F = [F, sum(PG_G((intersect(find(gen_total(:,22)==1),find(gen_total(:,31)==Area))),1:Horizon,sce),2) <= gen_total(intersect(find(gen_total(:,22)==1),find(gen_total(:,31)==Area)),9)*EHydro_day(Area,day(sce))/24*Horizon];
     end
-    % ES power output constraints 
+    % ES power output constraints
     F = [F, -invest_ES_BatteryAndCAES*ones(1,Horizon) <= PG_ES_BatteryAndCAES(:,:,sce) <= invest_ES_BatteryAndCAES*ones(1,Horizon)];
     F = [F, -a.HydroPump(:,3).*invest_ES_PumpHydro*ones(1,Horizon) <= PG_ES_PumpHydro(:,:,sce) <= a.HydroPump(:,3).*invest_ES_PumpHydro*ones(1,Horizon)];
-    % ES energy constraints 
-    F = [F, 0 <= E_ES_BatteryAndCAES(:,:,sce) <= (invest_ES_BatteryAndCAES.*a.Storage(:,12))*ones(1,Horizon)];% 电量是容量的XX倍
-    F = [F, 0 <= E_ES_PumpHydro(:,:,sce) <= (invest_ES_PumpHydro.*a.HydroPump(:,12)).*a.HydroPump(:,3)*ones(1,Horizon)];% 电量是容量的XX倍  
-    F = [F, E_ES_BatteryAndCAES(:,1,sce) == (invest_ES_BatteryAndCAES.*a.Storage(:,12))*E_ES0];%初始电量状态
-    F = [F, E_ES_PumpHydro(:,1,sce) == (invest_ES_PumpHydro.*a.HydroPump(:,12)).*a.HydroPump(:,3)*E_ES0];%初始电量状态  
-    % Load shifting DR constraints 
+    % ES energy constraints
+    F = [F, 0 <= E_ES_BatteryAndCAES(:,:,sce) <= (invest_ES_BatteryAndCAES.*a.Storage(:,12))*ones(1,Horizon)];
+    F = [F, 0 <= E_ES_PumpHydro(:,:,sce) <= (invest_ES_PumpHydro.*a.HydroPump(:,12)).*a.HydroPump(:,3)*ones(1,Horizon)];
+    F = [F, E_ES_BatteryAndCAES(:,1,sce) == (invest_ES_BatteryAndCAES.*a.Storage(:,12))*E_ES0];
+    F = [F, E_ES_PumpHydro(:,1,sce) == (invest_ES_PumpHydro.*a.HydroPump(:,12)).*a.HydroPump(:,3)*E_ES0];
+    % Load shifting DR constraints
     F = [F, -invest_DR1*ones(1,Horizon) <= PG_DR1(:,:,sce) <= invest_DR1*ones(1,Horizon)];
     F = [F, PG_DR1(:,:,sce) <= abs_PG_DR1(:,:,sce)];
     F = [F, -PG_DR1(:,:,sce) <= abs_PG_DR1(:,:,sce)];
-    % Load shedding DR constraints 
+    % Load shedding DR constraints
     F = [F, invest_DR2*ones(1,Horizon) >= PG_DR2(:,:,sce) >= 0];
-	% CSP internal constraints 
-    F = [F, PG_CSP(:,:,sce)/efficiency_ele_ther+Et_TES(:,1:Horizon,sce)-[Capacity_TES_CSP*CSP_total(:,9)*ratio_TES_t0,Et_TES(:,1:Horizon-1,sce)] <= PCSP_day(:,:,sce)];%热功率平衡
-    F = [F, 0 <= Et_TES(:,:,sce) <= Capacity_TES_CSP*CSP_total(:,9)*ones(1,Horizon)];%储热能量约束
-    F = [F, Et_TES(:,Horizon,sce) == Capacity_TES_CSP*CSP_total(:,9)*ratio_TES_t0];%储热初始能量,储热始末状态一致
+    % CSP internal constraints
+    F = [F, PG_CSP(:,:,sce)/efficiency_ele_ther+Et_TES(:,1:Horizon,sce)-[Capacity_TES_CSP*CSP_total(:,9)*ratio_TES_t0,Et_TES(:,1:Horizon-1,sce)] <= PCSP_day(:,:,sce)];
+    F = [F, 0 <= Et_TES(:,:,sce) <= Capacity_TES_CSP*CSP_total(:,9)*ones(1,Horizon)];
+    F = [F, Et_TES(:,Horizon,sce) == Capacity_TES_CSP*CSP_total(:,9)*ratio_TES_t0];
     
 end
 % Wind and PV output constraints
@@ -439,7 +439,7 @@ F = [F, 0 <= PG_RE <= PRE_day];
 F = [F, 0 <= PC_Load <= PLoad_day0];
 % Reserve constraints
 F = [F, sum(onoff.*(M_max_gen)-PG_G,1) >= sum(CoeffReseve_load*PLoad_day0,1)+sum(CoeffReserve_VRE*PG_RE,1)];
-% ES initial and final states constraints 
+% ES initial and final states constraints
 F = [F, E_ES_BatteryAndCAES(:,1,:) == E_ES_BatteryAndCAES(:,Horizon,:)];
 F = [F, E_ES_PumpHydro(:,1,:) == E_ES_PumpHydro(:,Horizon,:)];
 % Initial and final states constraints Load shifting DR
@@ -498,7 +498,7 @@ z_invest_ES_PumpHydro = value(invest_ES_PumpHydro);
 z_invest_DR1 = value(invest_DR1);
 z_invest_DR2 = value(invest_DR2);
 
-% Investment capacity 
+% Investment capacity
 z_Capacity_invest_gen_peak_depth_Coal = sum(z_invest_gen_peak_depth(find(gen_total(:,22)==2)));
 z_Capacity_invest_gen_peak_depth_Gas = sum(z_invest_gen_peak_depth(find(gen_total(:,22)==5)));
 z_Capacity_invest_line_AC_CollectionGrid = sum(z_invest_line_AC(find(a.candi_AC(:,15)==2)).*a.candi_AC(find(a.candi_AC(:,15)==2),6));
