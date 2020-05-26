@@ -11,3 +11,5 @@ This repository, and the associated data has been developed to facilitate operat
 1. [Source_data](https://github.com/HaoLi9401/Dataset_of_flexibility_test_system_FTS-213/tree/master/Source_data) contains several `csv` files that describe all the FTS-213 data.
 
 2. [Formatted_data](https://github.com/HaoLi9401/Dataset_of_flexibility_test_system_FTS-213/tree/master/Formatted_data) contains a folder for the tool specific data format. The tool used in the paper is [MATLAB](https://www.mathworks.com/products/matlab.html).
+
+3. [Time series_data](https://github.com/HaoLi9401/Dataset_of_flexibility_test_system_FTS-213/tree/master/Time_series_data) contains several `csv` files that describe the time-series data of available renewable production and demand data for each area.
