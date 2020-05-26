@@ -1,0 +1,7 @@
+Generation unit type,$/kW,Note
+Coal-fired thermal unit,460,
+Gas-fired thermal unit,321,
+Hydro unit,2057,
+Wind turbine,1137,
+PV,854,
+CSP unit,6836,"SM:2.4, TES hour:10h"
