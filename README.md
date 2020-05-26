@@ -2,7 +2,7 @@
 
 ### This repository is for the Flexibility Test System (FTS-213).
 
-This repository, and the associated data has been developed to facilitate operation simulation and flexibility resource planning. 
+This repository, and the associated data has been developed to facilitate operation simulation and flexibility resource planning, also further studies can be conducted based on the dataset. 
 
 ![FTS-213 Topology](https://github.com/HaoLi9401/Dataset_of_flexibility_test_system_FTS-213/blob/master/Network_topology.png)
 
